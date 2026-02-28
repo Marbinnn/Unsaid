@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Unsaid – Prototype</title>
+<style>
+  :root{
+    --bg0:#060914;
+    --bg1:#0a1224;
+
+    --glass: rgba(255,255,255,0.06);
+    --glass2: rgba(255,255,255,0.08);
+    --stroke: rgba(255,255,255,0.10);
+    --stroke2: rgba(255,255,255,0.14);
+
+    --text:#e7eaf1;
+    --muted:#a0a8bb;
+
+    --accent:#7c5cff;
+
+    --radius: 22px;
+
+    --safeBg: rgba(124,92,255,0.18);
+    --safeStroke: rgba(124,92,255,0.35);
+
+    --chipBg: rgba(255,255,255,0.05);
+    --chipStroke: rgba(255,255,255,0.10);
+
+    --inputBg: rgba(255,255,255,0.04);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    background:
+      radial-gradient(900px 650px at 25% 12%, rgba(124,92,255,0.18), transparent 60%),
+      radial-gradient(1000px 700px at 80% 18%, rgba(34,211,238,0.12), transparent 62%),
+      radial-gradient(1000px 700px at 60% 88%, rgba(45,212,191,0.10), transparent 62%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+
+  .phone{
+    width: 390px;
+    height: 844px;
+    max-width: 92vw;
+    max-height: 92vh;
+    border-radius: 44px;
+    background:
+      radial-gradient(600px 600px at 35% 10%, rgba(255,255,255,0.07), transparent 55%),
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.65);
+    overflow:hidden;
+    position:relative;
+  }
+
+  .statusbar{
+    height: 44px;
+    padding: 12px 18px 0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    color: rgba(231,234,241,0.92);
+    font-weight: 700;
+    letter-spacing: .2px;
+    font-size: 14px;
+    user-select:none;
+  }
+  .sb-right{display:flex; align-items:center; gap:8px; opacity:.95}
+  .icon{width:18px; height:18px; display:inline-block}
+
+  .screen{
+    height: calc(100% - 44px);
+    display:none;
+    flex-direction:column;
+  }
+  .screen.active{display:flex}
+
+  .header{
+    padding: 10px 18px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{width:34px;height:34px;border-radius:14px;
+    background: rgba(124,92,255,0.14);
+    border:1px solid rgba(124,92,255,0.22);
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter: blur(10px);
+  }
+  .brandtext{display:flex; flex-direction:column; gap:2px}
+  .brandtext h1{
+    margin:0;
+    font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+    font-weight: 800;
+  }
+  .brandtext p{margin:0; font-size: 12px; color: var(--muted)}
+
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--stroke);
+    background: rgba(255,255,255,0.05);
+    font-size: 12px;
+    color: var(--text);
+    user-select:none;
+    backdrop-filter: blur(10px);
+  }
+  .pill.safe{background: var(--safeBg); border-color: var(--safeStroke)}
+  .pill.live{background: rgba(124,92,255,0.16); border-color: rgba(124,92,255,0.28)}
+  .pill.small{padding:7px 10px; font-size:11px}
+
+  .seg{padding: 0 18px 10px; display:flex; gap:10px}
+  .seg .chip{
+    flex:1;
+    padding:10px 0;
+    border-radius: 999px;
+    border:1px solid var(--chipStroke);
+    background: rgba(255,255,255,0.03);
+    color: var(--muted);
+    font-size: 12px;
+    text-align:center;
+    cursor:pointer;
+    user-select:none;
+    transition: .12s ease;
+    backdrop-filter: blur(10px);
+  }
+  .seg .chip.active{
+    background: rgba(124,92,255,0.18);
+    border-color: rgba(124,92,255,0.32);
+    color: var(--text);
+  }
+
+  .content{flex:1; overflow:auto; padding: 6px 14px 90px;}
+  .content::-webkit-scrollbar{width:0}
+
+  .post{
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.09);
+    background:
+      radial-gradient(420px 180px at 20% 0%, rgba(255,255,255,0.06), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+    box-shadow: 0 24px 60px rgba(0,0,0,0.42);
+    padding: 14px;
+    margin: 10px 4px;
+    cursor:pointer;
+    transition: transform .12s ease, border-color .12s ease;
+    backdrop-filter: blur(12px);
+  }
+  .post:hover{transform: translateY(-1px); border-color: rgba(255,255,255,0.16)}
+
+  .post-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom: 10px;}
+  .who{display:flex; gap:10px; align-items:center; min-width:0}
+  .avatar{
+    width: 34px; height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    flex: 0 0 auto;
+    position:relative;
+    overflow:hidden;
+  }
+  .avatar::after{
+    content:"";
+    position:absolute; inset:-20px;
+    background: radial-gradient(30px 30px at 30% 30%, rgba(255,255,255,0.18), transparent 60%);
+    pointer-events:none;
+  }
+  .initials{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:850;
+    font-size:12px;
+    color: rgba(231,234,241,0.95);
+    text-shadow: 0 6px 20px rgba(0,0,0,0.45);
+  }
+
+  .who-text{min-width:0}
+  .name{font-weight: 820; font-size: 14px; display:flex; align-items:center; gap:8px; min-width:0;}
+  .meta{margin-top:2px; font-size: 11px; color: var(--muted)}
+  .tag-mini{font-size: 10px; padding: 4px 8px; border-radius: 999px;
+    background: rgba(124,92,255,0.14);
+    border: 1px solid rgba(124,92,255,0.22);
+    color: rgba(231,234,241,0.95);
+    white-space:nowrap;
+  }
+  .tag-mini.heavy{background: rgba(244,114,182,0.12); border-color: rgba(244,114,182,0.22)}
+
+  .post-body{font-size: 13px; line-height: 1.45; color: rgba(231,234,241,0.92); margin: 8px 0 12px;}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 12px;}
+  .moodchip{padding: 7px 10px; border-radius: 999px; font-size: 11px; user-select:none; cursor:pointer;
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .moodchip.dim{color: var(--muted); background: rgba(255,255,255,0.035);}
+  .moodchip.active.teal{background: rgba(34,211,238,0.13); border-color: rgba(34,211,238,0.22); color: rgba(231,234,241,0.95);}
+  .moodchip.active.green{background: rgba(45,212,191,0.13); border-color: rgba(45,212,191,0.22); color: rgba(231,234,241,0.95);}
+  .moodchip.active.purple{background: rgba(124,92,255,0.13); border-color: rgba(124,92,255,0.22); color: rgba(231,234,241,0.95);}
+
+  .actions{display:flex; justify-content:space-between; align-items:center; gap:12px;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    color: rgba(231,234,241,0.92);
+    font-size: 12px;
+    cursor:pointer;
+    user-select:none;
+    transition: .12s ease;
+    text-decoration:none;
+    backdrop-filter: blur(10px);
+    white-space:nowrap;
+  }
+  .btn:hover{border-color: rgba(255,255,255,0.16); transform: translateY(-1px)}
+  .btn:active{transform: translateY(0px) scale(.99)}
+  .btn.soft{background: rgba(124,92,255,0.10); border-color: rgba(124,92,255,0.22);}
+  .btn.warm{background: rgba(45,212,191,0.12); border-color: rgba(45,212,191,0.22);}
+
+  .count{font-size: 12px; color: var(--muted); display:flex; align-items:center; gap:10px;}
+  .count b{color: rgba(231,234,241,0.92)}
+  .count .replytap{cursor:pointer; padding:6px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.03);}
+  .count .replytap:hover{border-color: rgba(255,255,255,0.16);}
+
+  .nav{position:absolute; left:0; right:0; bottom:0; padding: 12px 18px 22px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.55));
+    backdrop-filter: blur(10px);
+  }
+  .navbar{display:flex; justify-content:space-between; gap:10px; padding: 10px 10px; border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.10); background: rgba(12,18,34,0.60);
+  }
+  .navbtn{flex:1; display:flex; align-items:center; justify-content:center; height: 42px; border-radius: 14px;
+    border: 1px solid transparent; background: transparent; cursor:pointer; transition: .12s ease;
+  }
+  .navbtn svg{width:22px;height:22px;opacity:.92}
+  .navbtn.active{background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.10);}
+  .navbtn.active svg{opacity:1}
+  .home-indicator{margin: 10px auto 0; width: 128px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.18); opacity: .7;}
+
+  .topbar{padding: 6px 18px 6px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .backbtn{display:inline-flex; align-items:center; gap:8px; padding: 10px 12px; border-radius: 999px;
+    border:1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04); color: rgba(231,234,241,0.92);
+    font-size: 12px; cursor:pointer; user-select:none; transition:.12s ease; backdrop-filter: blur(10px);
+  }
+  .backbtn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,0.16);}
+  .title2{padding: 0 18px 10px; font-size: 22px; letter-spacing: .2px; font-weight: 860;}
+
+  .field{border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: rgba(12,18,34,0.60);
+    padding: 14px; margin: 10px 4px 14px; backdrop-filter: blur(12px);
+  }
+  textarea{width:100%; min-height: 92px; resize:none; border:none; outline:none; border-radius: 14px; background: var(--inputBg);
+    color: rgba(231,234,241,0.95); padding: 12px; font-size: 13px; line-height: 1.45;
+  }
+  textarea::placeholder{color: rgba(160,168,187,0.80);}
+  .row2{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px;}
+  .mini{font-size: 12px; color: var(--muted);}
+  .smallbtn{padding: 9px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04);
+    color: rgba(231,234,241,0.92); font-size: 12px; cursor:pointer;
+  }
+  .moods{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .toggle{display:flex; gap:10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); padding: 6px; border-radius: 999px; width: fit-content;}
+  .toggle .opt{padding: 8px 12px; border-radius: 999px; font-size: 12px; color: var(--muted); cursor:pointer; user-select:none;}
+  .toggle .opt.active{background: rgba(34,211,238,0.14); border: 1px solid rgba(34,211,238,0.20); color: rgba(231,234,241,0.95);}
+
+  .bigcta{margin: 12px 18px 18px; height: 54px; border-radius: 999px; border: 1px solid rgba(124,92,255,0.30);
+    background: linear-gradient(135deg, rgba(124,92,255,0.95), rgba(124,92,255,0.55));
+    color:white; font-weight: 880; letter-spacing: .2px; font-size: 14px; cursor:pointer; box-shadow: 0 18px 50px rgba(124,92,255,0.18);
+  }
+  .bigcta:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
+
+  .replybar{position:absolute; left:0; right:0; bottom:0; padding: 12px 14px 22px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0.55));
+    backdrop-filter: blur(10px);
+  }
+  .replybox{display:flex; align-items:center; gap:10px; padding: 10px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(12,18,34,0.65); backdrop-filter: blur(12px);
+  }
+  .sendbtn{width:42px; height:42px; border-radius: 14px; border: 1px solid rgba(124,92,255,0.28); background: rgba(124,92,255,0.22);
+    color:white; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .sendbtn svg{width:20px;height:20px}
+  .replyinput{flex:1; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04);
+    color: rgba(231,234,241,0.95); padding: 10px 12px; outline:none; font-size: 13px;
+  }
+  .replyinput::placeholder{color: rgba(160,168,187,0.78);}
+
+  /* profile */
+  .profile-hero{margin: 8px 4px 12px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.10);
+    background:
+      radial-gradient(520px 220px at 18% 0%, rgba(124,92,255,0.16), transparent 60%),
+      radial-gradient(520px 220px at 88% 30%, rgba(34,211,238,0.10), transparent 62%),
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    box-shadow: 0 24px 60px rgba(0,0,0,0.42);
+    padding: 14px; backdrop-filter: blur(12px);
+  }
+  .profile-row{display:flex; gap:12px; align-items:center}
+  .big-avatar{width:56px;height:56px;border-radius: 18px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+    position:relative; overflow:hidden; flex: 0 0 auto;
+  }
+  .big-avatar::after{content:""; position:absolute; inset:-30px; background: radial-gradient(40px 40px at 30% 30%, rgba(255,255,255,0.20), transparent 60%);}
+  .profile-text{min-width:0}
+  .profile-text h2{margin:0;font-size:16px;font-weight:860}
+  .profile-text p{margin:4px 0 0; font-size:12px; color: var(--muted)}
+
+  .form{display:grid; gap:10px; margin-top: 12px;}
+  .input{width:100%; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04);
+    color: rgba(231,234,241,0.95); padding: 10px 12px; outline:none; font-size: 13px;
+  }
+  .input::placeholder{color: rgba(160,168,187,0.78);}
+  .form .row{display:flex; gap:10px;}
+  .form .row > *{flex:1;}
+  .hintline{font-size:12px;color:var(--muted); margin-top: 2px;}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div class="statusbar">
+    <div id="time">6:21</div>
+    <div class="sb-right">
+      <svg class="icon" viewBox="0 0 24 24" fill="none">
+        <path d="M3 18h2v3H3v-3Zm4-4h2v7H7v-7Zm4-4h2v11h-2V10Zm4-4h2v15h-2V6Zm4-2h2v17h-2V4Z" fill="currentColor" opacity=".9"/>
+      </svg>
+      <svg class="icon" viewBox="0 0 24 24" fill="none">
+        <path d="M2.5 8.5C8.5 3.5 15.5 3.5 21.5 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+        <path d="M5.5 12C10 8 14 8 18.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+        <path d="M8.5 15.5C11 13.5 13 13.5 15.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+        <path d="M12 19.5h0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon" viewBox="0 0 28 14" fill="none">
+        <rect x="1" y="1" width="23" height="12" rx="3" stroke="currentColor" opacity=".8"/>
+        <rect x="25" y="4" width="2" height="6" rx="1" fill="currentColor" opacity=".8"/>
+        <rect x="3" y="3" width="15" height="8" rx="2" fill="currentColor" opacity=".9"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section class="screen active" id="screen-home">
+    <div class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- simple logo: chat bubble + sparkle -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6.5 6.8A4.3 4.3 0 0 1 10.8 2.5h6.4A4.3 4.3 0 0 1 21.5 6.8v4.7A4.3 4.3 0 0 1 17.2 15.8H12l-4.2 3v-3h-1.3A4.3 4.3 0 0 1 2.2 11.5V6.8A4.3 4.3 0 0 1 6.5 2.5" stroke="rgba(231,234,241,0.9)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M14 6.2l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" fill="rgba(231,234,241,0.9)"/>
+          </svg>
+        </div>
+        <div class="brandtext">
+          <h1>Unsaid</h1>
+          <p>a gentle space to let it out</p>
+        </div>
+      </div>
+      <div class="pill safe">Safe</div>
+    </div>
+
+    <div class="seg">
+      <div class="chip active" data-feed="foryou">For You</div>
+      <div class="chip" data-feed="nearby">Nearby</div>
+      <div class="chip" data-feed="following">Following</div>
+    </div>
+
+    <div class="content" id="feed"></div>
+
+    <div class="nav">
+      <div class="navbar">
+        <button class="navbtn active" data-nav="home" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 10.5 12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="navbtn" data-nav="create" aria-label="Create">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="navbtn" data-nav="thread" aria-label="Live thread">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 6.5A3 3 0 0 1 7.5 3.5h9A3 3 0 0 1 19.5 6.5v6a3 3 0 0 1-3 3H10l-4.5 3v-3h-1A3 3 0 0 1 1.5 12.5v-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="navbtn" data-nav="profile" aria-label="Profile">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm7 9a7 7 0 0 0-14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </section>
+
+  <!-- CREATE -->
+  <section class="screen" id="screen-create">
+    <div class="topbar">
+      <button class="backbtn" id="back-create" aria-label="Back">
+        <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M14.5 6.5 9 12l5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="pill small">
+        <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 22A10 10 0 1 0 2 12a10 10 0 0 0 10 10Z" stroke="currentColor" stroke-width="2"/></svg>
+        Draft
+      </div>
+    </div>
+
+    <div class="title2">Create Post</div>
+
+    <div class="content">
+      <div class="field">
+        <textarea id="postText" maxlength="280" placeholder="What feels unsaid right now?"></textarea>
+        <div class="row2">
+          <div class="mini"><span id="charsLeft">280</span> left</div>
+          <button class="smallbtn" id="addPrompt" type="button">Add</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="row2">
+          <div>
+            <div style="font-weight:860; font-size:13px">Choose moods</div>
+            <div class="mini">tap to toggle</div>
+          </div>
+          <div class="mini" id="moodCount">0 selected</div>
+        </div>
+        <div class="moods" id="moods"></div>
+      </div>
+
+      <div class="field">
+        <div style="font-weight:860; font-size:13px; margin-bottom:8px">Posting mode</div>
+        <div class="toggle" id="modeToggle">
+          <div class="opt active" data-mode="anonymous">Anonymous</div>
+          <div class="opt" data-mode="public">Public</div>
+        </div>
+        <div class="hintline">Default can be changed in Profile.</div>
+      </div>
+    </div>
+
+    <button class="bigcta" id="postBtn" disabled>Post to Unsaid</button>
+  </section>
+
+  <!-- THREAD -->
+  <section class="screen" id="screen-thread">
+    <div class="topbar">
+      <button class="backbtn" id="back-thread" aria-label="Back">
+        <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M14.5 6.5 9 12l5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="pill live">Live Thread</div>
+    </div>
+
+    <div class="content" id="thread"></div>
+
+    <div class="replybar">
+      <div class="replybox">
+        <button class="sendbtn" id="sendReply" aria-label="Send">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12 20 4l-4 16-5-6-7-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+        <input class="replyinput" id="replyInput" placeholder="Write a gentle reply..." />
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="screen" id="screen-profile">
+    <div class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6.5 6.8A4.3 4.3 0 0 1 10.8 2.5h6.4A4.3 4.3 0 0 1 21.5 6.8v4.7A4.3 4.3 0 0 1 17.2 15.8H12l-4.2 3v-3h-1.3A4.3 4.3 0 0 1 2.2 11.5V6.8A4.3 4.3 0 0 1 6.5 2.5" stroke="rgba(231,234,241,0.9)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M14 6.2l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" fill="rgba(231,234,241,0.9)"/>
+          </svg>
+        </div>
+        <div class="brandtext">
+          <h1>Unsaid</h1>
+          <p>profile settings</p>
+        </div>
+      </div>
+      <div class="pill">🙂</div>
+    </div>
+
+    <div class="content">
+      <div class="profile-hero">
+        <div class="profile-row">
+          <div class="big-avatar" id="profileAvatar"></div>
+          <div class="profile-text">
+            <h2 id="profileTitle">You</h2>
+            <p id="profileSub">gentle replies, no pressure</p>
+          </div>
+        </div>
+
+        <div class="form">
+          <div>
+            <div class="mini" style="margin-bottom:6px">Display name</div>
+            <input class="input" id="profileName" placeholder="e.g. Marbin" />
+          </div>
+          <div>
+            <div class="mini" style="margin-bottom:6px">Bio</div>
+            <input class="input" id="profileBio" placeholder="short line about you (optional)" />
+          </div>
+
+          <div class="row">
+            <div>
+              <div class="mini" style="margin-bottom:6px">Accent color</div>
+              <input class="input" id="profileAccent" type="color" style="padding:6px 10px; height:42px" />
+            </div>
+            <div>
+              <div class="mini" style="margin-bottom:6px">Default mode</div>
+              <div class="toggle" id="profileDefaultMode" style="width:100%">
+                <div class="opt active" data-mode="anonymous" style="flex:1;text-align:center">Anonymous</div>
+                <div class="opt" data-mode="public" style="flex:1;text-align:center">Public</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn soft" id="regenAvatar" type="button" style="width:100%; padding:12px 12px; border-radius:16px">Randomize profile pic</button>
+          <button class="btn" id="saveProfile" type="button" style="width:100%; padding:12px 12px; border-radius:16px">Save changes</button>
+          <button class="btn" id="resetProfile" type="button" style="width:100%; padding:12px 12px; border-radius:16px">Reset to default</button>
+
+          <div class="hintline">Your public posts + replies will use your display name.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="navbar">
+        <button class="navbtn" data-nav="home" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 10.5 12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="navbtn" data-nav="create" aria-label="Create">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="navbtn" data-nav="thread" aria-label="Live thread">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 6.5A3 3 0 0 1 7.5 3.5h9A3 3 0 0 1 19.5 6.5v6a3 3 0 0 1-3 3H10l-4.5 3v-3h-1A3 3 0 0 1 1.5 12.5v-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="navbtn active" data-nav="profile" aria-label="Profile">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm7 9a7 7 0 0 0-14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s, el=document) => el.querySelector(s);
+  const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+  // time
+  const nowTime = () => {
+    const d = new Date();
+    let h = d.getHours(), m = d.getMinutes();
+    h = h % 12; if(h===0) h=12;
+    return `${h}:${String(m).padStart(2,'0')}`;
+  };
+  $("#time").textContent = nowTime();
+  setInterval(() => { $("#time").textContent = nowTime(); }, 25000);
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // profile persistence
+  const PROFILE_KEY = "unsaid_profile_v3";
+  const defaultProfile = {
+    name: "You",
+    bio: "gentle replies, no pressure",
+    accent: "#7c5cff",
+    defaultMode: "anonymous",
+    avatarSeed: "you"
+  };
+  function loadProfile(){
+    try{
+      const raw = localStorage.getItem(PROFILE_KEY);
+      if(!raw) return {...defaultProfile};
+      const parsed = JSON.parse(raw);
+      return {...defaultProfile, ...parsed};
+    }catch{
+      return {...defaultProfile};
+    }
+  }
+  function saveProfile(p){ localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }
+
+  let profile = loadProfile();
+
+  // state
+  const MOODS = ["Anxious","Overwhelmed","Lonely","Hopeful","Relieved","Sad","Numb","Tired","Grateful","Heavy","Stressed","Calm"];
+  let selectedFeed = "foryou";
+  let activeThreadPostId = null;
+
+  const state = {
+    posts: [{'id': 'p1', 'author': 'Anonymous', 'time': '2m ago', 'severity': 'heavy', 'text': "I keep pretending I'm okay at work, but I feel like I'm sinking. I just needed to say it.", 'moods': ['Anxious', 'Overwhelmed', 'Lonely'], 'warmth': 0, 'feed': 'foryou', 'mode': 'anonymous', 'replies': [{'id': 'r793cf', 'author': 'Lena', 'time': '25m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r4220c', 'author': 'J', 'time': '24m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r917b8', 'author': 'Mika', 'time': '23m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r53860', 'author': 'Kai', 'time': '22m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r88659', 'author': 'Noah', 'time': '21m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r9b2ac', 'author': 'Aya', 'time': '20m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r757f8', 'author': 'Sam', 'time': '19m ago', 'text': "You're not weak for needing support."}, {'id': 'r29099', 'author': 'Rin', 'time': '18m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r6dd9d', 'author': 'Theo', 'time': '17m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 're5798', 'author': 'Nia', 'time': '16m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r121e8', 'author': 'Bea', 'time': '15m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'rfa462', 'author': 'Eli', 'time': '14m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'rd6e85', 'author': 'Sora', 'time': '13m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rbda6a', 'author': 'Ivy', 'time': '12m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r31787', 'author': 'June', 'time': '11m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r3a59e', 'author': 'Max', 'time': '10m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r01b29', 'author': 'Lena', 'time': '9m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'ra0a9a', 'author': 'J', 'time': '8m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r4d296', 'author': 'Mika', 'time': '7m ago', 'text': "You're not weak for needing support."}, {'id': 're948c', 'author': 'Kai', 'time': '6m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r5a0b1', 'author': 'Noah', 'time': '5m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 're5bb9', 'author': 'Aya', 'time': '4m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r3e6d6', 'author': 'Sam', 'time': '3m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r31115', 'author': 'Rin', 'time': '2m ago', 'text': 'I’m listening. No fixing, just staying with you.'}], 'replyCount': 24}, {'id': 'p4', 'author': 'Kai', 'time': '6m ago', 'severity': 'light', 'text': 'I finally cleaned my room today. Small thing, but my head feels quieter now.', 'moods': ['Relieved', 'Hopeful'], 'warmth': 3, 'feed': 'foryou', 'mode': 'public', 'replies': [{'id': 'r41f7a', 'author': 'Lena', 'time': '13m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r139d6', 'author': 'J', 'time': '12m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rf67ed', 'author': 'Mika', 'time': '11m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'rf17de', 'author': 'Kai', 'time': '10m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r7d6f6', 'author': 'Noah', 'time': '9m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r11887', 'author': 'Aya', 'time': '8m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r67d84', 'author': 'Sam', 'time': '7m ago', 'text': "You're not weak for needing support."}, {'id': 'ra1a3c', 'author': 'Rin', 'time': '6m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r1fc2d', 'author': 'Theo', 'time': '5m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r65a9f', 'author': 'Nia', 'time': '4m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'rad68a', 'author': 'Bea', 'time': '3m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'rcf286', 'author': 'Eli', 'time': '2m ago', 'text': 'I’m listening. No fixing, just staying with you.'}], 'replyCount': 12}, {'id': 'p5', 'author': 'Anonymous', 'time': '10m ago', 'severity': 'heavy', 'text': 'I miss the version of me that used to laugh easily. I want that back.', 'moods': ['Sad', 'Lonely'], 'warmth': 7, 'feed': 'foryou', 'mode': 'anonymous', 'replies': [{'id': 'r1c481', 'author': 'Lena', 'time': '42m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r5efcc', 'author': 'J', 'time': '41m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r60650', 'author': 'Mika', 'time': '40m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r83cc7', 'author': 'Kai', 'time': '39m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r165af', 'author': 'Noah', 'time': '38m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 're0213', 'author': 'Aya', 'time': '37m ago', 'text': "You're doing your best with what you have today."}, {'id': 'rf841b', 'author': 'Sam', 'time': '36m ago', 'text': "You're not weak for needing support."}, {'id': 'r209b2', 'author': 'Rin', 'time': '35m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r2ec69', 'author': 'Theo', 'time': '34m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'rc7fc3', 'author': 'Nia', 'time': '33m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r23bdd', 'author': 'Bea', 'time': '32m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 're269f', 'author': 'Eli', 'time': '31m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'rd35b5', 'author': 'Sora', 'time': '30m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r54afa', 'author': 'Ivy', 'time': '29m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r80509', 'author': 'June', 'time': '28m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r33ff2', 'author': 'Max', 'time': '27m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r7d9b7', 'author': 'Lena', 'time': '26m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r501ae', 'author': 'J', 'time': '25m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r9eec4', 'author': 'Mika', 'time': '24m ago', 'text': "You're not weak for needing support."}, {'id': 'r8ba4d', 'author': 'Kai', 'time': '23m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r2459b', 'author': 'Noah', 'time': '22m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r6b22c', 'author': 'Aya', 'time': '21m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r5aba5', 'author': 'Sam', 'time': '20m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r9002b', 'author': 'Rin', 'time': '19m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r355f2', 'author': 'Theo', 'time': '18m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r35f79', 'author': 'Nia', 'time': '17m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rc7f79', 'author': 'Bea', 'time': '16m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'rb7aec', 'author': 'Eli', 'time': '15m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'rca9ed', 'author': 'Sora', 'time': '14m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r085eb', 'author': 'Ivy', 'time': '13m ago', 'text': "You're doing your best with what you have today."}, {'id': 'rcc042', 'author': 'June', 'time': '12m ago', 'text': "You're not weak for needing support."}, {'id': 'reb928', 'author': 'Max', 'time': '11m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rf7f24', 'author': 'Lena', 'time': '10m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r72941', 'author': 'J', 'time': '9m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r5c807', 'author': 'Mika', 'time': '8m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r5361a', 'author': 'Kai', 'time': '7m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r23819', 'author': 'Noah', 'time': '6m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r54d42', 'author': 'Aya', 'time': '5m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rb04d4', 'author': 'Sam', 'time': '4m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r69f2c', 'author': 'Rin', 'time': '3m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r558c9', 'author': 'Theo', 'time': '2m ago', 'text': 'If you can, breathe with me for a second. In… out…'}], 'replyCount': 41}, {'id': 'p6', 'author': 'Mika', 'time': '14m ago', 'severity': 'light', 'text': "If you're reading this and you're tired… same. Please drink water with me.", 'moods': ['Tired', 'Grateful'], 'warmth': 9, 'feed': 'foryou', 'mode': 'public', 'replies': [{'id': 'rca5c1', 'author': 'Lena', 'time': '19m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rd0809', 'author': 'J', 'time': '18m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r42530', 'author': 'Mika', 'time': '17m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r770f5', 'author': 'Kai', 'time': '16m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'reca56', 'author': 'Noah', 'time': '15m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r3fb9d', 'author': 'Aya', 'time': '14m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r1689f', 'author': 'Sam', 'time': '13m ago', 'text': "You're not weak for needing support."}, {'id': 'ra27a3', 'author': 'Rin', 'time': '12m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r1afb2', 'author': 'Theo', 'time': '11m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r51f71', 'author': 'Nia', 'time': '10m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r62a49', 'author': 'Bea', 'time': '9m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r30278', 'author': 'Eli', 'time': '8m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r010f4', 'author': 'Sora', 'time': '7m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r6b7b9', 'author': 'Ivy', 'time': '6m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rcc15d', 'author': 'June', 'time': '5m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'rf2996', 'author': 'Max', 'time': '4m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'rda560', 'author': 'Lena', 'time': '3m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'rfd8ad', 'author': 'J', 'time': '2m ago', 'text': "You're doing your best with what you have today."}], 'replyCount': 18}, {'id': 'p2', 'author': 'Maya', 'time': '12m ago', 'severity': 'light', 'text': "Today felt softer. I finally asked for help and it didn't feel like failing.", 'moods': ['Hopeful', 'Relieved'], 'warmth': 4, 'feed': 'foryou', 'mode': 'public', 'replies': [{'id': 'rda688', 'author': 'Lena', 'time': '1h ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r20c89', 'author': 'J', 'time': '1h ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r4a252', 'author': 'Mika', 'time': '1h ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r686f3', 'author': 'Kai', 'time': '1h ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'ra0e65', 'author': 'Noah', 'time': '1h ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r2733a', 'author': 'Aya', 'time': '1h ago', 'text': "You're doing your best with what you have today."}, {'id': 'r94250', 'author': 'Sam', 'time': '1h ago', 'text': "You're not weak for needing support."}, {'id': 'r5681a', 'author': 'Rin', 'time': '1h ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rab556', 'author': 'Theo', 'time': '1h ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r11518', 'author': 'Nia', 'time': '1h ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'rf364c', 'author': 'Bea', 'time': '1h ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'rffabd', 'author': 'Eli', 'time': '1h ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'rc1154', 'author': 'Sora', 'time': '1h ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rb797b', 'author': 'Ivy', 'time': '1h ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r6bcb3', 'author': 'June', 'time': '1h ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r76b56', 'author': 'Max', 'time': '1h ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r00369', 'author': 'Lena', 'time': '1h ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'raf19c', 'author': 'J', 'time': '1h ago', 'text': "You're doing your best with what you have today."}, {'id': 'r54ceb', 'author': 'Mika', 'time': '1h ago', 'text': "You're not weak for needing support."}, {'id': 'rb0e4e', 'author': 'Kai', 'time': '1h ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r0d63a', 'author': 'Noah', 'time': '1h ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r912f5', 'author': 'Aya', 'time': '1h ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r157a0', 'author': 'Sam', 'time': '1h ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r0cd74', 'author': 'Rin', 'time': '1h ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r14597', 'author': 'Theo', 'time': '1h ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rdab5b', 'author': 'Nia', 'time': '1h ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rb8a14', 'author': 'Bea', 'time': '1h ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'rb6ff3', 'author': 'Eli', 'time': '1h ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r26544', 'author': 'Sora', 'time': '1h ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r1b214', 'author': 'Ivy', 'time': '1h ago', 'text': "You're doing your best with what you have today."}, {'id': 'r5819f', 'author': 'June', 'time': '1h ago', 'text': "You're not weak for needing support."}, {'id': 'r86f91', 'author': 'Max', 'time': '59m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r49d10', 'author': 'Lena', 'time': '58m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'rbb26d', 'author': 'J', 'time': '57m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r2d196', 'author': 'Mika', 'time': '56m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r65622', 'author': 'Kai', 'time': '55m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r009d2', 'author': 'Noah', 'time': '54m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r2a561', 'author': 'Aya', 'time': '53m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r124d4', 'author': 'Sam', 'time': '52m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r3aa84', 'author': 'Rin', 'time': '51m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r32051', 'author': 'Theo', 'time': '50m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r8d9b4', 'author': 'Nia', 'time': '49m ago', 'text': "You're doing your best with what you have today."}, {'id': 'rbe7e5', 'author': 'Bea', 'time': '48m ago', 'text': "You're not weak for needing support."}, {'id': 'rf068e', 'author': 'Eli', 'time': '47m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'ra595a', 'author': 'Sora', 'time': '46m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r9a6f9', 'author': 'Ivy', 'time': '45m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r8b5a3', 'author': 'June', 'time': '44m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r7a65e', 'author': 'Max', 'time': '43m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r39101', 'author': 'Lena', 'time': '42m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r0577b', 'author': 'J', 'time': '41m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rcc7ed', 'author': 'Mika', 'time': '40m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r92a13', 'author': 'Kai', 'time': '39m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r51d0c', 'author': 'Noah', 'time': '38m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r5d17b', 'author': 'Aya', 'time': '37m ago', 'text': "You're doing your best with what you have today."}, {'id': 'rab40b', 'author': 'Sam', 'time': '36m ago', 'text': "You're not weak for needing support."}, {'id': 'rb3c6f', 'author': 'Rin', 'time': '35m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rbd2c5', 'author': 'Theo', 'time': '34m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r2ec60', 'author': 'Nia', 'time': '33m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r29344', 'author': 'Bea', 'time': '32m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'reebda', 'author': 'Eli', 'time': '31m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'rc9c3a', 'author': 'Sora', 'time': '30m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rc2fdb', 'author': 'Ivy', 'time': '29m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r75d93', 'author': 'June', 'time': '28m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'ra175f', 'author': 'Max', 'time': '27m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r7bded', 'author': 'Lena', 'time': '26m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r3f0db', 'author': 'J', 'time': '25m ago', 'text': "You're doing your best with what you have today."}, {'id': 'rf864a', 'author': 'Mika', 'time': '24m ago', 'text': "You're not weak for needing support."}, {'id': 'rb48f4', 'author': 'Kai', 'time': '23m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rfcfb1', 'author': 'Noah', 'time': '22m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'rd8550', 'author': 'Aya', 'time': '21m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 're9410', 'author': 'Sam', 'time': '20m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r7a4aa', 'author': 'Rin', 'time': '19m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 're7812', 'author': 'Theo', 'time': '18m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r1e377', 'author': 'Nia', 'time': '17m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rf2556', 'author': 'Bea', 'time': '16m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r06670', 'author': 'Eli', 'time': '15m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'rfab8c', 'author': 'Sora', 'time': '14m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r4a388', 'author': 'Ivy', 'time': '13m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r31a1c', 'author': 'June', 'time': '12m ago', 'text': "You're not weak for needing support."}, {'id': 'r2671f', 'author': 'Max', 'time': '11m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rcb224', 'author': 'Lena', 'time': '10m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'redc35', 'author': 'J', 'time': '9m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r415ef', 'author': 'Mika', 'time': '8m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'rebd78', 'author': 'Kai', 'time': '7m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r808ca', 'author': 'Noah', 'time': '6m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r93565', 'author': 'Aya', 'time': '5m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rc4562', 'author': 'Sam', 'time': '4m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r2902e', 'author': 'Rin', 'time': '3m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r30886', 'author': 'Theo', 'time': '2m ago', 'text': 'If you can, breathe with me for a second. In… out…'}], 'replyCount': 89}, {'id': 'p3', 'author': 'Kiko Aguilar', 'time': '8m ago', 'severity': 'light', 'text': 'Mura kog ma boang kay stress na kaayo ko. haha', 'moods': ['Stressed', 'Tired'], 'warmth': 1, 'feed': 'nearby', 'mode': 'public', 'replies': [{'id': 'r638c8', 'author': 'Lena', 'time': '10m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r803cb', 'author': 'J', 'time': '9m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r5fa6f', 'author': 'Mika', 'time': '8m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r755a1', 'author': 'Kai', 'time': '7m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r66ea4', 'author': 'Noah', 'time': '6m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r5bdeb', 'author': 'Aya', 'time': '5m ago', 'text': "You're doing your best with what you have today."}, {'id': 'ra2ef8', 'author': 'Sam', 'time': '4m ago', 'text': "You're not weak for needing support."}, {'id': 'r8438e', 'author': 'Rin', 'time': '3m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rfe28b', 'author': 'Theo', 'time': '2m ago', 'text': 'It’s okay to rest. You’re still enough.'}], 'replyCount': 9}, {'id': 'p7', 'author': 'Anonymous', 'time': '20m ago', 'severity': 'heavy', 'text': "Crowded places make me panic lately. I hate that I can't explain it well.", 'moods': ['Anxious', 'Overwhelmed'], 'warmth': 2, 'feed': 'nearby', 'mode': 'anonymous', 'replies': [{'id': 'r3905c', 'author': 'Lena', 'time': '6m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r5cf51', 'author': 'J', 'time': '5m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'ra77c5', 'author': 'Mika', 'time': '4m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r6fe9c', 'author': 'Kai', 'time': '3m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r8ad61', 'author': 'Noah', 'time': '2m ago', 'text': 'If you can, breathe with me for a second. In… out…'}], 'replyCount': 5}, {'id': 'p8', 'author': 'Lena', 'time': '32m ago', 'severity': 'light', 'text': 'Reminder: you can rest without earning it.', 'moods': ['Calm', 'Grateful'], 'warmth': 11, 'feed': 'following', 'mode': 'public', 'replies': [{'id': 'r161fa', 'author': 'Lena', 'time': '28m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r814b1', 'author': 'J', 'time': '27m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rcdb7b', 'author': 'Mika', 'time': '26m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'rebc0c', 'author': 'Kai', 'time': '25m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'r44fd8', 'author': 'Noah', 'time': '24m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r5ebb3', 'author': 'Aya', 'time': '23m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r54942', 'author': 'Sam', 'time': '22m ago', 'text': "You're not weak for needing support."}, {'id': 'rf1860', 'author': 'Rin', 'time': '21m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'rdd8f5', 'author': 'Theo', 'time': '20m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r034d8', 'author': 'Nia', 'time': '19m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 're2a8e', 'author': 'Bea', 'time': '18m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r50a88', 'author': 'Eli', 'time': '17m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r8ca15', 'author': 'Sora', 'time': '16m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rd8373', 'author': 'Ivy', 'time': '15m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r3f8d3', 'author': 'June', 'time': '14m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'rcdee5', 'author': 'Max', 'time': '13m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'rf59b8', 'author': 'Lena', 'time': '12m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r2e69c', 'author': 'J', 'time': '11m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r8ea1a', 'author': 'Mika', 'time': '10m ago', 'text': "You're not weak for needing support."}, {'id': 'rebb47', 'author': 'Kai', 'time': '9m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r7b28d', 'author': 'Noah', 'time': '8m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 're9d5c', 'author': 'Aya', 'time': '7m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r7c9a4', 'author': 'Sam', 'time': '6m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r8e66f', 'author': 'Rin', 'time': '5m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r3f528', 'author': 'Theo', 'time': '4m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r04aca', 'author': 'Nia', 'time': '3m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rb421e', 'author': 'Bea', 'time': '2m ago', 'text': "You're allowed to feel this. No need to rush yourself."}], 'replyCount': 27}, {'id': 'p9', 'author': 'J', 'time': '1h ago', 'severity': 'light', 'text': "I said 'no' today and the world did not end. 10/10 would recommend.", 'moods': ['Relieved'], 'warmth': 8, 'feed': 'following', 'mode': 'public', 'replies': [{'id': 'rb5bb2', 'author': 'Lena', 'time': '34m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'rb3eef', 'author': 'J', 'time': '33m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'r54ad4', 'author': 'Mika', 'time': '32m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r9e557', 'author': 'Kai', 'time': '31m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 're6d40', 'author': 'Noah', 'time': '30m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'r957a4', 'author': 'Aya', 'time': '29m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r7ad31', 'author': 'Sam', 'time': '28m ago', 'text': "You're not weak for needing support."}, {'id': 'rb95e3', 'author': 'Rin', 'time': '27m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r9652a', 'author': 'Theo', 'time': '26m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r20442', 'author': 'Nia', 'time': '25m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r5851a', 'author': 'Bea', 'time': '24m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'ra8ef4', 'author': 'Eli', 'time': '23m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r3a989', 'author': 'Sora', 'time': '22m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 'r10e80', 'author': 'Ivy', 'time': '21m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rb281e', 'author': 'June', 'time': '20m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r2fdef', 'author': 'Max', 'time': '19m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'rfa165', 'author': 'Lena', 'time': '18m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'rc9bf1', 'author': 'J', 'time': '17m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r84d6d', 'author': 'Mika', 'time': '16m ago', 'text': "You're not weak for needing support."}, {'id': 'rb36d8', 'author': 'Kai', 'time': '15m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r7e353', 'author': 'Noah', 'time': '14m ago', 'text': 'It’s okay to rest. You’re still enough.'}, {'id': 'r2f4c3', 'author': 'Aya', 'time': '13m ago', 'text': 'Sending warmth. One moment at a time.'}, {'id': 'r77555', 'author': 'Sam', 'time': '12m ago', 'text': 'That feeling makes sense. Anyone would struggle with that.'}, {'id': 'r28486', 'author': 'Rin', 'time': '11m ago', 'text': 'I’m listening. No fixing, just staying with you.'}, {'id': 'r922dc', 'author': 'Theo', 'time': '10m ago', 'text': "I'm here with you. You don't have to carry this alone."}, {'id': 're9c62', 'author': 'Nia', 'time': '9m ago', 'text': 'That sounds really heavy. Thank you for trusting us with it.'}, {'id': 'rceef8', 'author': 'Bea', 'time': '8m ago', 'text': "You're allowed to feel this. No need to rush yourself."}, {'id': 'r9b686', 'author': 'Eli', 'time': '7m ago', 'text': 'I hear you. Small steps still count.'}, {'id': 'rf76fa', 'author': 'Sora', 'time': '6m ago', 'text': 'If you can, breathe with me for a second. In… out…'}, {'id': 'rd4bf7', 'author': 'Ivy', 'time': '5m ago', 'text': "You're doing your best with what you have today."}, {'id': 'r87f04', 'author': 'June', 'time': '4m ago', 'text': "You're not weak for needing support."}, {'id': 'r71bec', 'author': 'Max', 'time': '3m ago', 'text': 'I’m proud of you for saying it out loud.'}, {'id': 'r09742', 'author': 'Lena', 'time': '2m ago', 'text': 'It’s okay to rest. You’re still enough.'}], 'replyCount': 33}],
+    create: { text:"", moods:new Set(), mode: profile.defaultMode }
+  };
+
+  // ensure replyCount always accurate
+  function syncCounts(){ state.posts.forEach(p => p.replyCount = (p.replies?.length || 0)); }
+
+  // avatar generator (deterministic gradient per seed)
+  function hashSeed(seed){
+    const str = String(seed || "");
+    let h = 2166136261;
+    for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0);
+  }
+  function hsl(h,s,l){ return `hsl(${h} ${s}% ${l}%)`; }
+  function avatarStyle(seed){
+    const h = hashSeed(seed);
+    const h1 = h % 360;
+    const h2 = (h1 + 60 + (h % 80)) % 360;
+    const h3 = (h2 + 40) % 360;
+    return `radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,0.25), transparent 55%),
+            radial-gradient(40px 40px at 70% 20%, ${hsl(h2,85,55)}, transparent 60%),
+            linear-gradient(135deg, ${hsl(h1,90,55)}, ${hsl(h3,85,45)})`;
+  }
+  function initials(name){
+    const n = (name || "").trim();
+    if(!n || n.toLowerCase() === "anonymous") return "";
+    const parts = n.split(/\s+/).filter(Boolean);
+    const a = parts[0]?.[0] || "";
+    const b = parts[1]?.[0] || "";
+    return (a + b).toUpperCase();
+  }
+
+  // accent application
+  function applyAccent(hex){
+    document.documentElement.style.setProperty("--accent", hex);
+    document.documentElement.style.setProperty("--safeBg", hexToRgba(hex, 0.18));
+    document.documentElement.style.setProperty("--safeStroke", hexToRgba(hex, 0.35));
+  }
+  function hexToRgba(hex, a){
+    const h = hex.replace("#","");
+    const r = parseInt(h.slice(0,2),16);
+    const g = parseInt(h.slice(2,4),16);
+    const b = parseInt(h.slice(4,6),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  function moodClass(m){
+    const m2 = (m||"").toLowerCase();
+    if(["anxious","overwhelmed","stressed"].includes(m2)) return "active teal";
+    if(["hopeful","relieved","grateful","calm"].includes(m2)) return "active green";
+    return "active purple";
+  }
+
+  // Navigation
+  function showScreen(name){
+    $$(".screen").forEach(s => s.classList.remove("active"));
+    $("#screen-" + name).classList.add("active");
+    $$(".navbtn").forEach(btn => btn.classList.toggle("active", btn.dataset.nav === name));
+  }
+  function goHome(){ showScreen("home"); activeThreadPostId = null; }
+
+  $$(".navbtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.nav;
+      if(target === "thread") openThread(activeThreadPostId || state.posts[0].id);
+      else if(target === "create") openCreate();
+      else if(target === "home") goHome();
+      else if(target === "profile") { showScreen("profile"); renderProfile(); }
+    });
+  });
+
+  $("#back-create").addEventListener("click", goHome);
+  $("#back-thread").addEventListener("click", goHome);
+
+  // Feed tabs
+  $$(".seg .chip").forEach(ch => {
+    ch.addEventListener("click", () => {
+      $$(".seg .chip").forEach(x => x.classList.remove("active"));
+      ch.classList.add("active");
+      selectedFeed = ch.dataset.feed;
+      renderFeed();
+    });
+  });
+
+  // Create moods
+  function renderCreateMoods(){
+    const wrap = $("#moods");
+    wrap.innerHTML = "";
+    MOODS.forEach((m) => {
+      const btn = document.createElement("div");
+      btn.className = "moodchip dim";
+      btn.textContent = m;
+      const on = state.create.moods.has(m);
+      if(on) btn.className = "moodchip " + moodClass(m);
+      btn.addEventListener("click", () => {
+        if(state.create.moods.has(m)) state.create.moods.delete(m);
+        else state.create.moods.add(m);
+        renderCreateMoods();
+        $("#moodCount").textContent = `${state.create.moods.size} selected`;
+      });
+      wrap.appendChild(btn);
+    });
+    $("#moodCount").textContent = `${state.create.moods.size} selected`;
+  }
+
+  // Create mode toggle
+  function syncCreateModeUI(){ $$("#modeToggle .opt").forEach(o => o.classList.toggle("active", o.dataset.mode === state.create.mode)); }
+  $("#modeToggle").addEventListener("click", (e) => {
+    const opt = e.target.closest(".opt");
+    if(!opt) return;
+    state.create.mode = opt.dataset.mode;
+    syncCreateModeUI();
+  });
+
+  // Create text
+  const postText = $("#postText");
+  const charsLeft = $("#charsLeft");
+  const postBtn = $("#postBtn");
+  function syncCreate(){
+    state.create.text = postText.value;
+    charsLeft.textContent = 280 - postText.value.length;
+    postBtn.disabled = postText.value.trim().length < 3;
+  }
+  postText.addEventListener("input", syncCreate);
+
+  $("#addPrompt").addEventListener("click", () => {
+    const starters = [
+      "I’ve been holding this in: ",
+      "Right now I need: ",
+      "I wish someone knew that: ",
+      "Today felt heavy because: ",
+      "A small win I want to share: "
+    ];
+    if(postText.value.trim().length === 0){
+      postText.value = starters[Math.floor(Math.random()*starters.length)];
+      postText.focus();
+      syncCreate();
+    } else postText.focus();
+  });
+
+  function openCreate(){
+    state.create.mode = profile.defaultMode;
+    syncCreateModeUI();
+    showScreen("create");
+    renderCreateMoods();
+    syncCreate();
+    requestAnimationFrame(()=> postText.focus());
+  }
+
+  // Submit post
+  postBtn.addEventListener("click", () => {
+    const text = state.create.text.trim();
+    if(text.length < 3) return;
+
+    const id = "p" + Math.random().toString(16).slice(2,8);
+    const isAnon = state.create.mode === "anonymous";
+    const author = isAnon ? "Anonymous" : (profile.name || "You");
+    const time = "Just now";
+    const severity = state.create.moods.size >= 3 ? "heavy" : "light";
+    const moods = Array.from(state.create.moods).slice(0, 3);
+
+    const newPost = {
+      id, author, time, severity, text,
+      moods: moods.length ? moods : ["Hopeful"],
+      warmth: 0,
+      replies: [],
+      replyCount: 0,
+      feed: "foryou",
+      mode: state.create.mode
+    };
+    state.posts.unshift(newPost);
+    syncCounts();
+
+    postText.value = "";
+    state.create.text = "";
+    state.create.moods = new Set();
+    renderCreateMoods();
+    syncCreate();
+
+    goHome();
+    renderFeed();
+    openThread(newPost.id, {focusReply:false});
+  });
+
+  // Build avatar DOM
+  function makeAvatar(name, seed){
+    const a = document.createElement("div");
+    a.className = "avatar";
+    a.style.background = avatarStyle(seed || name);
+    const ini = initials(name);
+    if(ini){
+      const t = document.createElement("div");
+      t.className = "initials";
+      t.textContent = ini;
+      a.appendChild(t);
+    }
+    return a;
+  }
+
+  // Post card
+  function postCard(post){
+    const el = document.createElement("div");
+    el.className = "post";
+    el.dataset.postId = post.id;
+
+    el.innerHTML = `
+      <div class="post-top">
+        <div class="who">
+          <div class="avatar" data-avatar></div>
+          <div class="who-text">
+            <div class="name">
+              <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${escapeHtml(post.author)}</span>
+              <span class="tag-mini ${post.severity === "heavy" ? "heavy" : ""}">${post.severity}</span>
+            </div>
+            <div class="meta">${escapeHtml(post.time)}</div>
+          </div>
+        </div>
+        <div class="pill small">${post.mode === "anonymous" ? "Anonymous" : "Public"}</div>
+      </div>
+
+      <div class="post-body">${escapeHtml(post.text)}</div>
+
+      <div class="chips">
+        ${post.moods.map(m => `<div class="moodchip ${moodClass(m)}">${escapeHtml(m)}</div>`).join("")}
+      </div>
+
+      <div class="actions">
+        <div style="display:flex; gap:10px; align-items:center">
+          <button class="btn warm js-warm" type="button">♡ Send warmth</button>
+          <button class="btn soft js-reply" type="button">💬 Reply</button>
+        </div>
+        <div class="count">
+          <span title="warmth">♡ <b>${post.warmth}</b></span>
+          <span class="replytap js-openreplies" title="replies">💬 <b>${post.replyCount}</b></span>
+        </div>
+      </div>
+    `;
+
+    // inject avatar
+    const avSlot = el.querySelector("[data-avatar]");
+    avSlot.replaceWith(makeAvatar(post.author, post.author + "|" + post.id));
+
+    el.addEventListener("click", (e) => {
+      const btn = e.target.closest("button, .js-openreplies");
+      if(btn) return;
+      openThread(post.id);
+    });
+
+    el.querySelector(".js-warm").addEventListener("click", (e) => {
+      e.stopPropagation();
+      post.warmth += 1;
+      renderFeed();
+      if(activeThreadPostId === post.id) renderThread();
+    });
+
+    el.querySelector(".js-reply").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openThread(post.id, {focusReply:true});
+    });
+
+    el.querySelector(".js-openreplies").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openThread(post.id);
+    });
+
+    return el;
+  }
+
+  function renderFeed(){
+    syncCounts();
+    const feed = $("#feed");
+    feed.innerHTML = "";
+    let list;
+    if(selectedFeed === "foryou"){
+      const foryou = state.posts.filter(p => p.feed === "foryou");
+      const others = state.posts.filter(p => p.feed !== "foryou").slice(0,2);
+      list = [...foryou, ...others];
+    } else {
+      list = state.posts.filter(p => p.feed === selectedFeed);
+    }
+    list.forEach(p => feed.appendChild(postCard(p)));
+  }
+
+  // Thread
+  function threadReplyCard(r){
+    const el = document.createElement("div");
+    el.className = "post";
+    el.style.cursor = "default";
+    el.innerHTML = `
+      <div class="post-top" style="margin-bottom:8px">
+        <div class="who">
+          <div class="avatar" data-avatar></div>
+          <div class="who-text">
+            <div class="name">${escapeHtml(r.author)}</div>
+            <div class="meta">${escapeHtml(r.time)}</div>
+          </div>
+        </div>
+        <div class="pill small">Warmth</div>
+      </div>
+      <div class="post-body" style="margin:0">${escapeHtml(r.text)}</div>
+    `;
+    const avSlot = el.querySelector("[data-avatar]");
+    avSlot.replaceWith(makeAvatar(r.author, r.author + "|" + r.id));
+    return el;
+  }
+
+  function renderThread(){
+    syncCounts();
+    const wrap = $("#thread");
+    wrap.innerHTML = "";
+    const post = state.posts.find(p => p.id === activeThreadPostId);
+    if(!post){
+      wrap.innerHTML = `<div class="post" style="cursor:default"><div class="post-body" style="margin:0">No post selected.</div></div>`;
+      return;
+    }
+
+    const top = document.createElement("div");
+    top.className = "post";
+    top.style.cursor = "default";
+    top.innerHTML = `
+      <div class="post-top">
+        <div class="who">
+          <div class="avatar" data-avatar></div>
+          <div class="who-text">
+            <div class="name">
+              ${escapeHtml(post.author)}
+              <span class="tag-mini ${post.severity==="heavy"?"heavy":""}">${post.severity}</span>
+            </div>
+            <div class="meta">${escapeHtml(post.time)}</div>
+          </div>
+        </div>
+        <div class="pill safe small">${post.mode === "anonymous" ? "Anonymous" : "Public"}</div>
+      </div>
+      <div class="post-body">${escapeHtml(post.text)}</div>
+      <div class="chips">
+        ${post.moods.map(m => `<div class="moodchip ${moodClass(m)}">${escapeHtml(m)}</div>`).join("")}
+      </div>
+      <div class="actions">
+        <button class="btn warm js-warm-thread" type="button">♡ Send warmth</button>
+        <div class="count">💬 <b>${post.replyCount}</b> replies</div>
+      </div>
+    `;
+    top.querySelector("[data-avatar]").replaceWith(makeAvatar(post.author, post.author + "|" + post.id));
+    top.querySelector(".js-warm-thread").addEventListener("click", () => {
+      post.warmth += 1;
+      renderThread();
+      renderFeed();
+    });
+    wrap.appendChild(top);
+
+    if(post.replies.length){
+      post.replies.forEach(r => wrap.appendChild(threadReplyCard(r)));
+    } else {
+      const empty = document.createElement("div");
+      empty.className = "post";
+      empty.style.cursor = "default";
+      empty.innerHTML = `<div class="post-body" style="margin:0;color:rgba(231,234,241,0.86)">No replies yet. Be the first to leave a gentle reply.</div>`;
+      wrap.appendChild(empty);
+    }
+    wrap.style.paddingBottom = "120px";
+  }
+
+  function openThread(postId, opts={}){
+    activeThreadPostId = postId;
+    showScreen("thread");
+    renderThread();
+    if(opts.focusReply) requestAnimationFrame(()=> $("#replyInput").focus());
+  }
+
+  // Reply send
+  const replyInput = $("#replyInput");
+  function sendReply(){
+    const txt = replyInput.value.trim();
+    if(!txt) return;
+    const post = state.posts.find(p => p.id === activeThreadPostId);
+    if(!post) return;
+
+    post.replies.push({
+      id: "r" + Math.random().toString(16).slice(2,7),
+      author: profile.name || "You",
+      time: "Just now",
+      text: txt
+    });
+    syncCounts();
+    replyInput.value = "";
+    renderThread();
+    renderFeed();
+    const wrap = $("#thread");
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+  $("#sendReply").addEventListener("click", sendReply);
+  replyInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){ e.preventDefault(); sendReply(); }
+  });
+
+  // Create mode UI
+  function syncCreateModeUI(){ $$("#modeToggle .opt").forEach(o => o.classList.toggle("active", o.dataset.mode === state.create.mode)); }
+
+  // Profile UI
+  function renderProfile(){
+    $("#profileTitle").textContent = profile.name || "You";
+    $("#profileSub").textContent = profile.bio || "gentle replies, no pressure";
+    $("#profileName").value = profile.name || "";
+    $("#profileBio").value = profile.bio || "";
+    $("#profileAccent").value = profile.accent || "#7c5cff";
+    applyAccent($("#profileAccent").value);
+
+    $$("#profileDefaultMode .opt").forEach(o => o.classList.toggle("active", o.dataset.mode === profile.defaultMode));
+
+    // profile avatar
+    const pv = $("#profileAvatar");
+    pv.style.background = avatarStyle(profile.avatarSeed || profile.name);
+  }
+
+  // Profile interactions
+  $("#profileDefaultMode").addEventListener("click", (e) => {
+    const opt = e.target.closest(".opt");
+    if(!opt) return;
+    $$("#profileDefaultMode .opt").forEach(o => o.classList.remove("active"));
+    opt.classList.add("active");
+  });
+
+  $("#profileAccent").addEventListener("input", (e) => applyAccent(e.target.value));
+
+  $("#regenAvatar").addEventListener("click", () => {
+    profile.avatarSeed = Math.random().toString(16).slice(2,10);
+    saveProfile(profile);
+    renderProfile();
+  });
+
+  $("#saveProfile").addEventListener("click", () => {
+    profile = {
+      name: $("#profileName").value.trim() || "You",
+      bio: $("#profileBio").value.trim() || "gentle replies, no pressure",
+      accent: $("#profileAccent").value || "#7c5cff",
+      defaultMode: $("#profileDefaultMode .opt.active").dataset.mode,
+      avatarSeed: profile.avatarSeed || "you"
+    };
+    saveProfile(profile);
+    renderProfile();
+    state.create.mode = profile.defaultMode;
+    syncCreateModeUI();
+  });
+
+  $("#resetProfile").addEventListener("click", () => {
+    profile = {...defaultProfile};
+    saveProfile(profile);
+    renderProfile();
+    state.create.mode = profile.defaultMode;
+    syncCreateModeUI();
+  });
+
+  // Create boot
+  const postTextEl = $("#postText");
+  const charsLeftEl = $("#charsLeft");
+  const postBtnEl = $("#postBtn");
+
+  function syncCreate(){
+    state.create.text = postTextEl.value;
+    charsLeftEl.textContent = 280 - postTextEl.value.length;
+    postBtnEl.disabled = postTextEl.value.trim().length < 3;
+  }
+  postTextEl.addEventListener("input", syncCreate);
+
+  $("#addPrompt").addEventListener("click", () => {
+    const starters = [
+      "I’ve been holding this in: ",
+      "Right now I need: ",
+      "I wish someone knew that: ",
+      "Today felt heavy because: ",
+      "A small win I want to share: "
+    ];
+    if(postTextEl.value.trim().length === 0){
+      postTextEl.value = starters[Math.floor(Math.random()*starters.length)];
+      postTextEl.focus();
+      syncCreate();
+    } else postTextEl.focus();
+  });
+
+  // back buttons
+  $("#back-create").addEventListener("click", goHome);
+  $("#back-thread").addEventListener("click", goHome);
+
+  // open create
+  function openCreate(){
+    state.create.mode = profile.defaultMode;
+    syncCreateModeUI();
+    showScreen("create");
+    renderCreateMoods();
+    syncCreate();
+    requestAnimationFrame(()=> postTextEl.focus());
+  }
+
+  // post button already attached earlier (needs access to postTextEl etc.)
+  // (rewire safely)
+  postBtnEl.addEventListener("click", () => {
+    // handler already exists above; keep single by checking flag
+  }, {once:true});
+
+  // submit post (single source of truth)
+  $("#postBtn").addEventListener("click", () => {
+    const text = state.create.text.trim();
+    if(text.length < 3) return;
+
+    const id = "p" + Math.random().toString(16).slice(2,8);
+    const isAnon = state.create.mode === "anonymous";
+    const author = isAnon ? "Anonymous" : (profile.name || "You");
+    const time = "Just now";
+    const severity = state.create.moods.size >= 3 ? "heavy" : "light";
+    const moods = Array.from(state.create.moods).slice(0, 3);
+
+    const newPost = {
+      id, author, time, severity, text,
+      moods: moods.length ? moods : ["Hopeful"],
+      warmth: 0,
+      replies: [],
+      replyCount: 0,
+      feed: "foryou",
+      mode: state.create.mode
+    };
+    state.posts.unshift(newPost);
+    syncCounts();
+
+    postTextEl.value = "";
+    state.create.text = "";
+    state.create.moods = new Set();
+    renderCreateMoods();
+    syncCreate();
+
+    goHome();
+    renderFeed();
+    openThread(newPost.id);
+  });
+
+  // nav routing
+  $$(".navbtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.nav;
+      if(target === "thread") openThread(activeThreadPostId || state.posts[0].id);
+      else if(target === "create") openCreate();
+      else if(target === "home") goHome();
+      else if(target === "profile") { showScreen("profile"); renderProfile(); }
+    });
+  });
+
+  // feed tabs
+  $$(".seg .chip").forEach(ch => {
+    ch.addEventListener("click", () => {
+      $$(".seg .chip").forEach(x => x.classList.remove("active"));
+      ch.classList.add("active");
+      selectedFeed = ch.dataset.feed;
+      renderFeed();
+    });
+  });
+
+  // boot
+  applyAccent(profile.accent || "#7c5cff");
+  renderProfile();
+  state.create.mode = profile.defaultMode;
+  syncCreateModeUI();
+  renderCreateMoods();
+  syncCreate();
+  syncCounts();
+  renderFeed();
+})();
+</script>
+</body>
+</html>
